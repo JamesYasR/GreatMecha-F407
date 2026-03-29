@@ -100,7 +100,7 @@ void RunMKS42D(){//放在定时器中断中执行
 		GPIO_RMIO tempio = tempmks->io;
 		
 		if(tempschedule->state==EMPTY){
-			if(__HAL_TIM_GetCompare(tempmks->htim,tempmks->Channel)>0){
+			if(__HAL_TIM_GetCompare(tempmks->htim,tempmks->Channel)>0){//如果波还在就调一次，重复调会出问题（频率太高）
 				setPWM(tempmks->htim,tempmks->Channel,2000,0);//如果是接下来任务是空的那么停转
 			}
 		}

@@ -4,8 +4,7 @@
 #include "MKS42D.h"
 
 uint32_t TIM6_Tick=0;
-uint8_t ucTrans[4]="test";
-uint8_t ucRecei[4];
+
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){//
 	if(htim->Instance==TIM6){
@@ -15,8 +14,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){//
 		
 		
 		if(KEY_DOWN==1){
-			HAL_UART_Transmit(&huart1,ucTrans,4,1000);
-			MKS42D_AddTask(MKS42D_0,1,1);
+			HAL_UART_Transmit(&huart1,ucTrans,strlen((char *)ucTrans),1000);
+			
 			KEY_DOWN=0;
 		}
 	}
@@ -24,9 +23,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){//
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 	if(huart->Instance==USART1){
-		memcpy(ucTrans,ucRecei,4);
-		HAL_UART_Transmit(&huart1,ucTrans,4,1000);
+		memcpy(ucTrans,ucRecei,Size);
+		memset(ucRecei,0,sizeof(ucRecei));
+		HAL_UART_Transmit(&huart1,ucTrans,Size,1000);
 	}
-	HAL_UARTEx_ReceiveToIdle_DMA(&huart1,ucRecei,50);
+	HAL_UARTEx_ReceiveToIdle_DMA(&huart1,ucRecei,ucBuffSize);
   __HAL_DMA_DISABLE_IT(&hdma_usart1_rx,DMA_IT_HT);
 }

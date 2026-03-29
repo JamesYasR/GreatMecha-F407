@@ -1,8 +1,7 @@
 #include "usart.h"
 
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
+uint8_t ucTrans[ucBuffSize]="test!";
+uint8_t ucRecei[ucBuffSize]="";
 
 UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_rx;

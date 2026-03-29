@@ -9,7 +9,6 @@ int main(void)
 {
 	InitAll();
 	
-	
   while (1)
   {
 

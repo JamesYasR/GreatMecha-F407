@@ -362,6 +362,6 @@ void setPWM(TIM_HandleTypeDef * htim, uint32_t channel,uint32_t freq, float duty
 	else{
 		__HAL_TIM_SetCompare(htim,channel,autoreload*duty);		
 	}
-	HAL_UART_Transmit(&huart1,(uint8_t *)"pwmset",6,50);
+	//HAL_UART_Transmit(&huart1,(uint8_t *)"pwmset",6,50);//debug
 }
 	
