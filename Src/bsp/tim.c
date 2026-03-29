@@ -1,6 +1,6 @@
 
 #include "tim.h"
-
+#include "usart.h"
 uint16_t PRESCALAR = 16;
 
 
@@ -356,6 +356,12 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 void setPWM(TIM_HandleTypeDef * htim, uint32_t channel,uint32_t freq, float duty){
 	uint16_t autoreload = 160000000/(freq*PRESCALAR);
 	__HAL_TIM_SetAutoreload(htim,autoreload);
-	__HAL_TIM_SetCompare(htim,channel,autoreload*duty);
+	if(duty<0.1){
+		__HAL_TIM_SetCompare(htim,channel,0);
+	}
+	else{
+		__HAL_TIM_SetCompare(htim,channel,autoreload*duty);		
+	}
+	HAL_UART_Transmit(&huart1,(uint8_t *)"pwmset",6,50);
 }
 	

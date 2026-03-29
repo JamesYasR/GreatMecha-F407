@@ -396,14 +396,14 @@
           <GroupName>Application/User</GroupName>
           <Files>
             <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/main.c</FilePath>
-            </File>
-            <File>
               <FileName>stm32f4xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/stm32f4xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/main.c</FilePath>
             </File>
             <File>
               <FileName>stm32f4xx_hal_msp.c</FileName>
@@ -424,6 +424,11 @@
               <FileName>MKS42D.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\drivers\MKS42D.c</FilePath>
+            </File>
+            <File>
+              <FileName>it.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\drivers\it.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -454,6 +459,11 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\bsp\usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\bsp\key.c</FilePath>
             </File>
           </Files>
         </Group>
