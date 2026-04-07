@@ -5,14 +5,18 @@
 #include "it.h"
 #include "key.h"
 #include "MKS42D.h"
+#include "serial.h"
+
+
 int main(void)
 {
 	InitAll();
 	
   while (1)
   {
-
+		
 		Key_Proc();
+		serial_proc();
 		
   }
 

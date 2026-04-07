@@ -1,5 +1,5 @@
-f407_uart/main.o: ..\Src\main.c ..\Inc\main.h \
-  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
+f407_uart/serial.o: ..\Src\drivers\serial.c ..\Inc\drivers\serial.h \
+  ..\Inc\main.h ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
   ..\Inc\stm32f4xx_hal_conf.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_def.h \
@@ -23,6 +23,4 @@ f407_uart/main.o: ..\Src\main.c ..\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
-  ..\Inc\drivers\init.h ..\Inc\bsp\usart.h ..\Inc\bsp\gpio.h \
-  ..\Inc\bsp\dma.h ..\Inc\bsp\rcc.h ..\Inc\bsp\tim.h ..\Inc\drivers\it.h \
-  ..\Inc\bsp\key.h ..\Inc\drivers\MKS42D.h ..\Inc\drivers\serial.h
+  ..\Inc\bsp\usart.h

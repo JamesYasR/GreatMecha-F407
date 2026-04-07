@@ -24,4 +24,4 @@ f407_uart/it.o: ..\Src\drivers\it.c ..\Inc\drivers\it.h ..\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
   ..\Inc\bsp\usart.h ..\Inc\drivers\MKS42D.h ..\Inc\bsp\tim.h \
-  ..\Inc\bsp\gpio.h ..\Inc\bsp\key.h
+  ..\Inc\bsp\gpio.h ..\Inc\bsp\key.h ..\Inc\bsp\dma.h

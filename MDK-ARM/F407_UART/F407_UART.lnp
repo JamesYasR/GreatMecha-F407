@@ -6,6 +6,7 @@
 "f407_uart\init.o"
 "f407_uart\mks42d.o"
 "f407_uart\it.o"
+"f407_uart\serial.o"
 "f407_uart\dma.o"
 "f407_uart\gpio.o"
 "f407_uart\rcc.o"
