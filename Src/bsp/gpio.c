@@ -1,6 +1,6 @@
 #include "gpio.h"
 
-GPIO_RMIO RMIOGroup[6];
+GPIO_RMIO RMIOGroup[4];
 void RMIO_Init(){
 	RMIOGroup[RMIO_1].GPIOGroup=GPIOB;
 	RMIOGroup[RMIO_1].GPIOPin=GPIO_PIN_12;
@@ -14,20 +14,14 @@ void RMIO_Init(){
 	RMIOGroup[RMIO_5].GPIOPin=GPIO_PIN_15;
 	RMIOGroup[RMIO_5].GPIOPinState=GPIO_PIN_RESET;
 	
-	RMIOGroup[RMIO_6].GPIOGroup=GPIOF;
-	RMIOGroup[RMIO_6].GPIOPin=GPIO_PIN_1;
-	RMIOGroup[RMIO_6].GPIOPinState=GPIO_PIN_RESET;
 	
 	RMIOGroup[RMIO_7].GPIOGroup=GPIOB;
 	RMIOGroup[RMIO_7].GPIOPin=GPIO_PIN_14;
 	RMIOGroup[RMIO_7].GPIOPinState=GPIO_PIN_RESET;
-	
-	RMIOGroup[RMIO_8].GPIOGroup=GPIOF;
-	RMIOGroup[RMIO_8].GPIOPin=GPIO_PIN_0;
-	RMIOGroup[RMIO_8].GPIOPinState=GPIO_PIN_RESET;
+
 }
 void RMIO_Update(){
-	for(int i=0;i<6;i++){
+	for(int i=0;i<4;i++){
 		HAL_GPIO_WritePin(RMIOGroup[i].GPIOGroup,RMIOGroup[i].GPIOPin,RMIOGroup[i].GPIOPinState);
 	}
 }
@@ -37,6 +31,7 @@ void GPIO_Init(void){
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOG_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
@@ -46,17 +41,13 @@ void GPIO_Init(void){
   __HAL_RCC_GPIOE_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PF0 PF1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pin : PA0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB12 PB13 PB14 PB15 */
   GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
@@ -64,12 +55,6 @@ void GPIO_Init(void){
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-	
-	/*Configure GPIO pin : PA0 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 	
 }
 

@@ -1,7 +1,8 @@
 
 #include "tim.h"
 #include "usart.h"
-uint16_t PRESCALAR = 16;
+uint16_t PRESCALAR_TIM1 = 16;
+uint16_t PRESCALAR_TIM8 = 1600;
 
 
 TIM_HandleTypeDef htim1;
@@ -111,7 +112,7 @@ void TIM1_Init(void)
 
 }
 /* TIM8 init function */
-void TIM8_Init(void)
+void TIM8_Init(void)//³õÊ¼»¯10000Hz->50Hz
 {
 
 
@@ -123,9 +124,9 @@ void TIM8_Init(void)
 
   /* USER CODE END TIM8_Init 1 */
   htim8.Instance = TIM8;
-  htim8.Init.Prescaler = 15;
+  htim8.Init.Prescaler = 1599;//1599
   htim8.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim8.Init.Period = 999;
+  htim8.Init.Period = 1999;//1999
   htim8.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim8.Init.RepetitionCounter = 0;
   htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
@@ -353,15 +354,25 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
   /* USER CODE END TIM6_MspDeInit 1 */
   }
 }
+
 void setPWM(TIM_HandleTypeDef * htim, uint32_t channel,uint32_t freq, float duty){
-	uint16_t autoreload = 160000000/(freq*PRESCALAR);
-	__HAL_TIM_SetAutoreload(htim,autoreload);
-	if(duty<0.1){
-		__HAL_TIM_SetCompare(htim,channel,0);
+	if(htim->Instance==TIM1){
+		uint16_t autoreload = 160000000/(freq*PRESCALAR_TIM1);
+		__HAL_TIM_SetAutoreload(htim,autoreload);
+		if(duty<0.1){
+			__HAL_TIM_SetCompare(htim,channel,0);
+		}
+		else{
+			__HAL_TIM_SetCompare(htim,channel,autoreload*duty);		
+		}
+		HAL_UART_Transmit(&huart1,(uint8_t *)"pwmset_1",8,2);
 	}
-	else{
-		__HAL_TIM_SetCompare(htim,channel,autoreload*duty);		
+	else if(htim->Instance==TIM8){
+		uint16_t autoreload = 160000000/(freq*PRESCALAR_TIM8);
+		__HAL_TIM_SetAutoreload(htim,autoreload);
+		__HAL_TIM_SetCompare(htim,channel,autoreload*duty);
+		HAL_UART_Transmit(&huart1,(uint8_t *)"pwmset_8",8,50);
 	}
-	//HAL_UART_Transmit(&huart1,(uint8_t *)"pwmset",6,50);//debug
+	
 }
 	

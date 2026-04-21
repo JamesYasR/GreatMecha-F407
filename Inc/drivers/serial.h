@@ -7,13 +7,18 @@
 #define STARTFLAG 0x80
 #define ENDFLAG 0x81
 #define SPLITFLAG 0x82
-#define SENDPOINTFLOATFLAG 0xA1
+#define SENDPOINTFLOATFLAG 0x83
+#define MKS42DTASKFLAG 0x84
+#define SERVOTASKFLAG 0x85
 
 extern __IO uint32_t serial_uwTick;
-void serial_proc();
-uint8_t ascii2digit(uint8_t ascii);
-void process_Point(uint8_t * str,uint16_t len);
+void Serial_proc();
+uint8_t process_Point(uint8_t *str, uint16_t len);
 extern float Point_Received[2];
+extern uint16_t error_serial[1];
+extern uint8_t TARGETUPDATE_FLAG;
+extern uint8_t temp;
+
 #endif
 
 

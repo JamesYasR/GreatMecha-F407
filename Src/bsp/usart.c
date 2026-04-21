@@ -19,7 +19,8 @@ DMA_HandleTypeDef hdma_usart1_tx;
 DMA_HandleTypeDef hdma_usart6_rx;
 DMA_HandleTypeDef hdma_usart6_tx;
 
-uint8_t usart6_tx_busy=0;
+uint16_t uart_recNum[2]={0,0};
+uint16_t error_recNum[2]={0,0};
 
 void USART1_UART_Init(void)
 {
@@ -36,7 +37,6 @@ void USART1_UART_Init(void)
   {
     Error_Handler();
   }
-
 
 }
 

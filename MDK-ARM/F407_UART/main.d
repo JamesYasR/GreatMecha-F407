@@ -18,6 +18,8 @@ f407_uart/main.o: ..\Src\main.c ..\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash_ramfunc.h \
+  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_i2c.h \
+  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_i2c_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_pwr.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_pwr_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim.h \
@@ -25,4 +27,6 @@ f407_uart/main.o: ..\Src\main.c ..\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
   ..\Inc\drivers\init.h ..\Inc\bsp\usart.h ..\Inc\bsp\gpio.h \
   ..\Inc\bsp\dma.h ..\Inc\bsp\rcc.h ..\Inc\bsp\tim.h ..\Inc\drivers\it.h \
-  ..\Inc\bsp\key.h ..\Inc\drivers\MKS42D.h ..\Inc\drivers\serial.h
+  ..\Inc\bsp\key.h ..\Inc\drivers\MKS42D.h ..\Inc\drivers\serial.h \
+  ..\Inc\drivers\oled.h ..\Inc\bsp\i2c.h ..\Inc\drivers\Servo.h \
+  ..\Inc\rmYel.h

@@ -30,7 +30,9 @@ extern uint8_t ucBuffer6[ucBuffSize];
 extern uint8_t IS_UART_RECEIVED[2];
 extern uint16_t ucBuffer_len[2];
 
-extern uint8_t usart6_tx_busy;
+extern uint16_t uart_recNum[2];
+extern uint16_t error_recNum[2];
+
 
 void USART1_UART_Init(void);
 void USART6_UART_Init(void);

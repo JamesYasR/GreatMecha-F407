@@ -18,6 +18,8 @@ void Key_Proc(void){
 	if(uwTick-Key_uwTick < 50){
 		return;
 	}
+	Key_uwTick=uwTick;
+	
 	ucKey_val =Key_Scan();
 	ucKey_down =ucKey_val & (ucKey_old ^ ucKey_val);
 	ucKey_up =~ucKey_val & (ucKey_old ^ ucKey_val);

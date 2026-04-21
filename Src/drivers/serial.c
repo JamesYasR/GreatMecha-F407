@@ -1,105 +1,108 @@
 #include "serial.h"
 #include "math.h"
+#include "oled.h"
+#include "MKS42D.h"
+#include "Servo.h"
+uint8_t TARGETUPDATE_FLAG=0;
 __IO uint32_t serial_uwTick=0;
 float Point_Received[2];
+uint16_t error_serial[1]={0};
 
-void serial_proc(){
+void Serial_proc(){
 	if(uwTick-serial_uwTick < 10){
 		return;
 	}
 	serial_uwTick=uwTick;
-	if(usart6_tx_busy) return;
+	
 	if(IS_UART_RECEIVED[0]==RECEIVED){
-		usart6_tx_busy = 1;
 		IS_UART_RECEIVED[0]=UNRECEIVED;
-		HAL_UART_Transmit_DMA(&huart1, ucRecei1, ucBuffer_len[0]);
-		
-		HAL_UARTEx_ReceiveToIdle_DMA(&huart1,ucRecei1,ucBuffSize);
-		__HAL_DMA_DISABLE_IT(&hdma_usart1_rx,DMA_IT_HT);
-//		if(ucBuffer1[0] != STARTFLAG){
-//			return;
-//		}
-//		else{
-//			if(ucBuffer1[1] == SENDPOINTFLOATFLAG){
-//				process_Point(ucBuffer1,ucBuffer_len[0]);
-//				//sprintf((char *)ucTrans6,"point:%.2f,%.2f",Point_Received[0],Point_Received[1]);
-//				//HAL_UART_Transmit(&huart6,ucTrans6,sizeof(ucTrans6),1000);
-//			}
-//			else{
-//				return;
-//			}
-//		}
+		if(ucBuffer1[1]==SENDPOINTFLOATFLAG){
+			if(process_Point(ucBuffer1,ucBuffer_len[0])){
+				TARGETUPDATE_FLAG=1;
+				return;
+			}
+			else{
+				error_serial[0]++;
+				return;
+			}
+		}
+		else if(ucBuffer1[1]==MKS42DTASKFLAG){//开始位 0x84 符号位 转速位 圈数位 结束位 5位
+			if(ucBuffer1[2]==0x00){
+				HAL_UART_Transmit(&huart1,(uint8_t *)"0",1,1);
+				MKS42D_AddTask(MKS42D_0,1.0*ucBuffer1[3],ucBuffer1[4]);
+			}
+			else if(ucBuffer1[2]==0x01){
+				HAL_UART_Transmit(&huart1,(uint8_t *)"1",1,1);
+				MKS42D_AddTask(MKS42D_0,-1.0*ucBuffer1[3],ucBuffer1[4]);
+			}
+
+		}
+		else if(ucBuffer1[1]==SERVOTASKFLAG){//开始位 0x85 符号位 转速位 时间位 结束位 5位
+			if(ucBuffer1[2]==0x00){
+				HAL_UART_Transmit(&huart1,(uint8_t *)"0",1,1);
+				Set_Servo360Speed(servo360+0,0.1f*ucBuffer1[3],100*ucBuffer1[4]);//正转向上
+			}
+			else if(ucBuffer1[2]==0x01){
+				HAL_UART_Transmit(&huart1,(uint8_t *)"1",1,1);
+				Set_Servo360Speed(servo360+0,-0.1f*ucBuffer1[3],100*ucBuffer1[4]);//反转向下
+			}
+			else if(ucBuffer1[2]==0x02){
+				HAL_UART_Transmit(&huart1,(uint8_t *)"2",1,1);
+				Set_Servo180Angle(servo180+0,1.0f*ucBuffer1[3]);//直接设置角度0x00-0xB4
+			}
+
+		}
+
 	}
 	
 }
 
-float parse_float_string(uint8_t* str, uint16_t len) {
-    float result = 0.0f;
-    float fraction = 0.1f;
-    uint8_t decimal_found = 0;
-    
-    for (uint16_t i = 0; i < len; i++) {
-        if (str[i] == '.') {
-            decimal_found = 1;
-            continue;
-        }
-        
-        if (decimal_found==0) {
-            result = result * 10.0f + ascii2digit(str[i]);
-        } else {
-            result += ascii2digit(str[i]) * fraction;
-            fraction *= 0.1f;
-        }
-    }
-    return result;
-}
-
-
-void process_Point(uint8_t * str,uint16_t len) {
-    if (len < 8) {  // 0x80 + 0xA1 + 最少1数字 + 0x82 + 最少1数字 + 0x81
-        return;
-    }
-    
-    if (str[0] != 0x80 || str[1] != 0xA1 || str[len-1] != 0x81) {
-        return;
-    }
-    
-
-    uint16_t split_index = 0;
-    for (uint16_t i = 2; i < len - 1; i++) {
-        if (str[i] == 0x82) {  // SPLITFLAG
-            split_index = i;
-            break;
-        }
-    }
-    
-    if (split_index == 0) {
-        return; 
-    }
-
-    uint16_t x_len = split_index - 2;
-    if (x_len == 0) return;
-    
-    uint16_t y_len = (len - 1) - (split_index + 1);
-    if (y_len == 0) return;
-
-    float number1 = parse_float_string(&str[2], x_len);
-    float number2 = parse_float_string(&str[split_index + 1], y_len);
-    
-    Point_Received[0] = number1;
-    Point_Received[1] = number2;
-
-}
-
-
-
-uint8_t ascii2digit(uint8_t ascii)
+uint8_t process_Point(uint8_t *str, uint16_t len)
 {
-   if(ascii >= '0' && ascii <= '9') {
-      return ascii - '0';
-   }
-	 
-	 else{
-			return 0xB3; 
-	 }
+    if (len < 12)
+    {
+        return 0;
+    }
+    
+    for (uint16_t i = 0; i <= len - 12; i++)
+    {
+        if (str[i] == STARTFLAG)
+        {
+            
+            if (str[i+1] == SENDPOINTFLOATFLAG)
+            {
+                
+                if (str[i+6] == SPLITFLAG)
+                {
+                    if (i + 11 < len && str[i+11] == ENDFLAG)
+                    {
+                        float x, y;
+                        memcpy(&x, &str[i+2], sizeof(float));
+                        memcpy(&y, &str[i+7], sizeof(float));
+                        
+                        Point_Received[0] = x;
+                        Point_Received[1] = y;
+                        
+                        
+                        return 1;
+                    }
+                    else
+                    {
+                        error_serial[0]++;
+                    }
+                }
+                else
+                {
+                    error_serial[0]++;
+                }
+            }
+            else
+            {
+                error_serial[0]++;
+            }
+        }
+    }
+    
+    error_serial[0]++;
+    return 0;
 }
