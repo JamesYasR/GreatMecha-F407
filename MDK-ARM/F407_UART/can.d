@@ -1,5 +1,4 @@
-f407_uart/stm32f4xx_hal_cortex.o: \
-  ..\Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.c \
+f407_uart/can.o: ..\Src\bsp\can.c ..\Inc\bsp\can.h ..\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
   ..\Inc\stm32f4xx_hal_conf.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h \

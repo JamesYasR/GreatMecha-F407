@@ -20,7 +20,7 @@ int main(void)
 		Key_Proc();
 		Serial_proc();
 		OLED_proc();
+		MKS42D_Proc();
   }
 
 }
-

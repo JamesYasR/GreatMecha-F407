@@ -1,167 +1,113 @@
 #include "MKS42D.h"
 #include "gpio.h"
-#define MKS42D_DIVISION 16
-#define STEPS_PER_REVOLUTION 3200
+#include "usart.h"
+#include "can.h"
+uint8_t ucCANTrans[20]="";
+__IO uint32_t mks42d_uwTick=0;
+int64_t mks42d_encoder[1]={0};
 
-MKS42D MKS42DGroup[MKS42D_NUM];
-uint8_t MKS42D_Index[MKS42D_NUM];
-uint8_t MKS42D_Taskx[MKS42D_NUM];
-MKS42DSchedule *MKS42D_Schedule[MKS42D_NUM];
-
-MKS42DSchedule MKS42D_0_Schedule[MAX_SCHEDULE];//循环使用//确保任务执行完成再顺行//更简单
-MKS42DSchedule MKS42D_1_Schedule[MAX_SCHEDULE];//循环使用
-MKS42DSchedule MKS42D_2_Schedule[MAX_SCHEDULE];
-MKS42DSchedule MKS42D_3_Schedule[MAX_SCHEDULE];
-
-
-void MKS42D_Init(){
-	//初始化任务表引索
-	MKS42D_Schedule[0]=MKS42D_0_Schedule;
-	MKS42D_Schedule[1]=MKS42D_1_Schedule;
-	MKS42D_Schedule[2]=MKS42D_2_Schedule;
-	MKS42D_Schedule[3]=MKS42D_3_Schedule;
-	//初始化执行引索
-	for(int i=0;i<MKS42D_NUM;i++){
-		MKS42D_Index[i]=0;
-		MKS42D_Taskx[i]=0;
-	}
-
-	//初始化任务表
-	for(int i=0;i<MAX_SCHEDULE;i++){
-		MKS42D_0_Schedule[i].state=EMPTY_;
-
-		MKS42D_1_Schedule[i].state=EMPTY_;
-
-		MKS42D_2_Schedule[i].state=EMPTY_;
-
-		MKS42D_3_Schedule[i].state=EMPTY_;
-
-	}
-	
-	//初始化电机硬件
-	MKS42DGroup[MKS42D_0].htim=&htim1;
-	MKS42DGroup[MKS42D_0].Channel=TIM_CHANNEL_1;
-	MKS42DGroup[MKS42D_0].io=RMIOGroup+RMIO_1;
-	MKS42DGroup[MKS42D_0].Steps=0;
-	
-	MKS42DGroup[MKS42D_1].htim=&htim1;
-	MKS42DGroup[MKS42D_1].Channel=TIM_CHANNEL_2;
-	MKS42DGroup[MKS42D_1].io=RMIOGroup+RMIO_3;
-	MKS42DGroup[MKS42D_1].Steps=0;
-	
-	MKS42DGroup[MKS42D_2].htim=&htim1;
-	MKS42DGroup[MKS42D_2].Channel=TIM_CHANNEL_3;
-	MKS42DGroup[MKS42D_2].io=RMIOGroup+RMIO_5;
-	MKS42DGroup[MKS42D_2].Steps=0;
-	
-	MKS42DGroup[MKS42D_3].htim=&htim1;
-	MKS42DGroup[MKS42D_3].Channel=TIM_CHANNEL_4;
-	MKS42DGroup[MKS42D_3].io=RMIOGroup+RMIO_7;
-	MKS42DGroup[MKS42D_3].Steps=0;
-	
-}
-
-void MKS42D_AddTask(uint8_t mks_num,float rotatespeed,float rotaten){//转速，行程
-	MKS42DSchedule *tempschedule = MKS42D_Schedule[mks_num];
-	MKS42D *tempmks = MKS42DGroup+mks_num;
-
-	if(tempschedule[MKS42D_Index[mks_num]].state==EMPTY_){
-		uint8_t tempdir=0;
-		float tempspeed=rotatespeed;
-		if(rotatespeed<0){//如果是反转记录为1
-			tempdir=1;
-			tempspeed*=-1;
+void MoveMKS42D(uint8_t num, uint16_t speed, uint8_t acc, int32_t absPulse)//speed->r/min//0x01 //3200step
+{
+	  if(absPulse > 8388607 || absPulse < -8388608) {
+        if(absPulse > 8388607) absPulse = 8388607;
+        if(absPulse < -8388608) absPulse = -8388608;
+    }//
+		if(absPulse > 7.62*STEPS_PER_REVOLUTION || absPulse < 0){//7.62*3200
+			if(absPulse > 7.62*STEPS_PER_REVOLUTION) absPulse=7.62*STEPS_PER_REVOLUTION;
+			if(absPulse < 0) absPulse=0;
 		}
-		else{
-			tempdir=0;
-			tempspeed*=1;
-		}
-		uint32_t total_steps_needed = (uint32_t)(rotaten * STEPS_PER_REVOLUTION);
-		uint32_t need_time_ms = (total_steps_needed * 1000) / ( (uint32_t)(tempspeed * STEPS_PER_REVOLUTION) );
+    // 提取24位有符号脉冲数（存储为32位，取低24位）
 
-		tempschedule[MKS42D_Index[mks_num]].Dir=tempdir;
-		tempschedule[MKS42D_Index[mks_num]].speed=tempspeed;
-		tempschedule[MKS42D_Index[mks_num]].Needtime=need_time_ms;
-		tempschedule[MKS42D_Index[mks_num]].state=WAITING_;
-	}
-	MKS42D_Index[mks_num]= (MKS42D_Index[mks_num]+1)%MAX_SCHEDULE;
-}
-
-
-void RunMKS42D(){//放在定时器中断中执行 //1ms一次
-	for(int i=0;i<MKS42D_NUM;i++){
-
-		MKS42D *tempmks = MKS42DGroup+i;
-		uint8_t tempTaskx=MKS42D_Taskx[i];
-		MKS42DSchedule *tempschedule = MKS42D_Schedule[i]+tempTaskx;
-		GPIO_RMIO *tempio = tempmks->io;
 		
-		if(tempschedule->state==EMPTY_){
-			if(__HAL_TIM_GetCompare(tempmks->htim,tempmks->Channel)>0){//如果波还在就调一次，重复调会出问题（频率太高）
-				setPWM(tempmks->htim,tempmks->Channel,2000,0);//如果是接下来任务是空的那么停转
-			}
-		}
-		else if(tempschedule->state==WAITING_){
-			__IO uint32_t uwTick_End=tempschedule->Needtime+uwTick;
-			tempschedule->Endtime=uwTick_End;
-			tempschedule->state=RUNNING_;
-			float tempspeed=tempschedule->speed;
-			uint32_t tempfreq=tempspeed*STEPS_PER_REVOLUTION;
-			if(tempschedule->Dir==1){
-				tempio->GPIOPinState=GPIO_PIN_SET;
-				RMIO_Update();
-			}
-			else if(tempschedule->Dir==0){
-				tempio->GPIOPinState=GPIO_PIN_RESET;
-				RMIO_Update();
-			}
-			setPWM(tempmks->htim,tempmks->Channel,tempfreq,0.2);
-		}
-		else if(tempschedule->state==RUNNING_){
-			if(tempschedule->Endtime > uwTick){
-				if(i==MKS42D_0){
-					if(tempschedule->Dir==0){
-						if(tempmks->Steps + 0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION > 7.62* STEPS_PER_REVOLUTION){//最大转动到7.62圈 再多机构会干涉
-							setPWM(tempmks->htim,tempmks->Channel,2000,0);//急停
-							Schedule_Reset(MKS42D_Schedule[i]);
-							MKS42D_Taskx[i] = 0;
-							MKS42D_Index[i] = 0;
-							continue;
-						}
-						tempmks->Steps+=0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION;
-					}
-					else if(tempschedule->Dir==1){
-						if(tempmks->Steps + 1000< 0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION){
-							setPWM(tempmks->htim,tempmks->Channel,2000,0);//急停
-							Schedule_Reset(MKS42D_Schedule[i]);
-							MKS42D_Taskx[i] = 0;
-							MKS42D_Index[i] = 0;
-							continue;
-						}
-						tempmks->Steps-=0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION;
-					}
-				}
-				tempschedule->state=RUNNING_;
-			}
-			else if(tempschedule->Endtime <= uwTick){
-				//tempschedule->state=FINNESHED;
-				//结束后置空
-				tempschedule->state=EMPTY_;
-				tempschedule->Needtime=0;
-				tempschedule->speed=0;
+		uint32_t pulse = (uint32_t)(absPulse & 0x00FFFFFF); // 屏蔽高8位，保留低24位
+		
+    uint8_t speed_high = (speed >> 8) & 0xFF;
+    uint8_t speed_low = speed & 0xFF;
 
-				MKS42D_Taskx[i]=(MKS42D_Taskx[i]+1)%MAX_SCHEDULE;//拨到下一个任务
-			}
+    uint8_t pulse_byte4 = (pulse >> 16) & 0xFF;  // 最高字节
+    uint8_t pulse_byte5 = (pulse >> 8) & 0xFF;
+    uint8_t pulse_byte6 = pulse & 0xFF;           // 最低字节
+    
+    // 计算CRC校验和：地址 + 功能码 + 速度高 + 速度低 + 加速度 + 脉冲数3字节
+    uint8_t crc = num;           // 地址
+    crc += 0xFE;                // 功能码
+    crc += speed_high;
+    crc += speed_low;
+    crc += acc;
+    crc += pulse_byte4;
+    crc += pulse_byte5;
+    crc += pulse_byte6;
+    // uint8_t加法自动取模256，得到低8位累加和
+    
+    // 填充发送数据数组（8字节数据场）
+    ucCANTrans[0] = 0xFE;       // 功能码
+    ucCANTrans[1] = speed_high; // 速度高字节
+    ucCANTrans[2] = speed_low;  // 速度低字节
+    ucCANTrans[3] = acc;        // 加速度
+    ucCANTrans[4] = pulse_byte4; // 脉冲数最高字节
+    ucCANTrans[5] = pulse_byte5; // 脉冲数次高字节
+    ucCANTrans[6] = pulse_byte6; // 脉冲数最低字节
+    ucCANTrans[7] = crc;        // CRC校验和
+    
+    // 配置CAN发送报文头
+    CAN_TxHeaderTypeDef TxHeader;
+    TxHeader.StdId = num;           // 标准标识符（电机地址）
+    TxHeader.ExtId = 0;
+    TxHeader.IDE = CAN_ID_STD;      // 标准帧
+    TxHeader.RTR = CAN_RTR_DATA;    // 数据帧
+    TxHeader.DLC = 8;               // 数据长度8字节
+    TxHeader.TransmitGlobalTime = DISABLE;
+    
+    // 发送CAN报文
+    uint32_t mailbox;  // 发送邮箱号
+    HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&hcan2, &TxHeader, ucCANTrans, &mailbox);
+		
+		if(status != HAL_OK) {
+			//HAL_UART_Transmit(&huart1,(uint8_t *)"Can2SendFail",12,2);
+    }
+		else{
+			//HAL_UART_Transmit(&huart1,(uint8_t *)"Can2SendSucc",12,2);
 		}
-	}
+		
 }
 
-void Schedule_Reset(MKS42DSchedule * schedule){
-	for(int i=0;i<MAX_SCHEDULE;i++){
-		schedule->state=EMPTY_;
-		schedule->Endtime=0;
-		schedule->Needtime=0;
-		schedule->Dir=0;
-		schedule->speed=0.0;
+uint8_t ReadMKSEncoder(uint8_t num)//放在主循环
+{
+    // 发送查询指令，需要包含CRC校验和
+    uint8_t tx_data[2];
+    tx_data[0] = 0x31;  // 功能码：读取累加制编码器值
+    
+    // 计算CRC校验和：地址 + 功能码
+    uint8_t crc = num + 0x31;
+    tx_data[1] = crc;
+    
+    CAN_TxHeaderTypeDef TxHeader;
+    TxHeader.StdId = num;           // 目标电机地址
+    TxHeader.ExtId = 0;
+    TxHeader.IDE = CAN_ID_STD;
+    TxHeader.RTR = CAN_RTR_DATA;
+    TxHeader.DLC = 2;               // 数据长度2字节，不是1字节
+    TxHeader.TransmitGlobalTime = DISABLE;
+    
+    uint32_t mailbox;
+    HAL_StatusTypeDef status = HAL_CAN_AddTxMessage(&hcan2, &TxHeader, tx_data, &mailbox);
+    
+    if(status != HAL_OK) {
+				//HAL_UART_Transmit(&huart1,(uint8_t *)"Can2SendFail",12,2);
+        return 0;  // 发送失败
+    }
+		else{
+			//HAL_UART_Transmit(&huart1,(uint8_t *)"Can2SendSucc",12,2);
+		}
+    
+    return 1;
+}
+
+void MKS42D_Proc(){//放主循环0.1s一次
+	if(uwTick-mks42d_uwTick < 100){
+		return;
 	}
+	mks42d_uwTick=uwTick;
+	
+	ReadMKSEncoder(MKS42D_1);
 }

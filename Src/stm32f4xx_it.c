@@ -54,7 +54,8 @@
 
 /* USER CODE END 0 */
 
-/* External variables --------------------------------------------------------*/
+
+extern CAN_HandleTypeDef hcan2;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim6;
 extern TIM_HandleTypeDef htim8;
@@ -64,6 +65,7 @@ extern DMA_HandleTypeDef hdma_usart6_rx;
 extern DMA_HandleTypeDef hdma_usart6_tx;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart6;
+
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -387,6 +389,32 @@ void USART6_IRQHandler(void)
   /* USER CODE END USART6_IRQn 1 */
 }
 
-/* USER CODE BEGIN 1 */
+void CAN2_TX_IRQHandler(void)
+{
 
-/* USER CODE END 1 */
+  HAL_CAN_IRQHandler(&hcan2);
+
+}
+
+
+void CAN2_RX0_IRQHandler(void)
+{
+
+  HAL_CAN_IRQHandler(&hcan2);
+
+}
+
+void CAN2_RX1_IRQHandler(void)
+{
+
+  HAL_CAN_IRQHandler(&hcan2);
+
+}
+
+
+void CAN2_SCE_IRQHandler(void)
+{
+
+  HAL_CAN_IRQHandler(&hcan2);
+
+}

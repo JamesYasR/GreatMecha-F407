@@ -15,6 +15,7 @@ f407_uart/init.o: ..\Src\drivers\init.c ..\Inc\drivers\init.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_dma.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_dma_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_cortex.h \
+  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_can.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_flash_ramfunc.h \
@@ -28,4 +29,4 @@ f407_uart/init.o: ..\Src\drivers\init.c ..\Inc\drivers\init.h \
   ..\Inc\bsp\usart.h ..\Inc\bsp\gpio.h ..\Inc\bsp\dma.h ..\Inc\bsp\rcc.h \
   ..\Inc\bsp\tim.h ..\Inc\drivers\MKS42D.h ..\Inc\drivers\oled.h \
   ..\Inc\bsp\i2c.h ..\Inc\drivers\Servo.h ..\Inc\rmYel.h \
-  ..\Inc\drivers\Serial.h
+  ..\Inc\drivers\Serial.h ..\Inc\bsp\can.h
