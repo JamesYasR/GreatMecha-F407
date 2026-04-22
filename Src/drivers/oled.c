@@ -379,6 +379,7 @@ void OLED_proc(){
 	oled_uwTick=uwTick;
 	
 	sprintf((char *)oled_line0,"Point:%.4f,%.4f ",Point_Received[0],Point_Received[1]);//系统时间 TIM6时间
+	sprintf((char *)oled_line1,"STEPS:%d         ",MKS42DGroup[MKS42D_0].Steps);//系统时间 TIM6时间
 	sprintf((char *)oled_line4,"time:%d %d        ",uwTick/1000,TIM6_Tick/1000);//系统时间 TIM6时间
   sprintf((char *)oled_line5,"uartr:%d %d         ",uart_recNum[0],uart_recNum[1]);
 	sprintf((char *)oled_line6,"debug:%d %d %d  ",error_recNum[0],error_recNum[1],error_serial[0]);//串口1 串口2 解析

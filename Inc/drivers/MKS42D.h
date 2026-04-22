@@ -28,6 +28,7 @@ typedef struct{
 	TIM_HandleTypeDef * htim;
 	uint32_t Channel;
 	GPIO_RMIO *io;
+	uint32_t Steps;
 }MKS42D;
 
 typedef struct{
@@ -40,7 +41,7 @@ typedef struct{
 
 void MKS42D_Init();
 void RunMKS42D();
-//void signalMKS42D();
+void Schedule_Reset(MKS42DSchedule * schedule);
 void MKS42D_AddTask(uint8_t mks_num,float rotatespeed,float rotaten);
 
 extern MKS42D MKS42DGroup[MKS42D_NUM];

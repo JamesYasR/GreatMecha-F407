@@ -14,7 +14,6 @@ MKS42DSchedule MKS42D_2_Schedule[MAX_SCHEDULE];
 MKS42DSchedule MKS42D_3_Schedule[MAX_SCHEDULE];
 
 
-
 void MKS42D_Init(){
 	//初始化任务表引索
 	MKS42D_Schedule[0]=MKS42D_0_Schedule;
@@ -30,29 +29,35 @@ void MKS42D_Init(){
 	//初始化任务表
 	for(int i=0;i<MAX_SCHEDULE;i++){
 		MKS42D_0_Schedule[i].state=EMPTY_;
+
 		MKS42D_1_Schedule[i].state=EMPTY_;
+
 		MKS42D_2_Schedule[i].state=EMPTY_;
+
 		MKS42D_3_Schedule[i].state=EMPTY_;
+
 	}
 	
 	//初始化电机硬件
 	MKS42DGroup[MKS42D_0].htim=&htim1;
 	MKS42DGroup[MKS42D_0].Channel=TIM_CHANNEL_1;
 	MKS42DGroup[MKS42D_0].io=RMIOGroup+RMIO_1;
+	MKS42DGroup[MKS42D_0].Steps=0;
 	
 	MKS42DGroup[MKS42D_1].htim=&htim1;
 	MKS42DGroup[MKS42D_1].Channel=TIM_CHANNEL_2;
 	MKS42DGroup[MKS42D_1].io=RMIOGroup+RMIO_3;
+	MKS42DGroup[MKS42D_1].Steps=0;
 	
 	MKS42DGroup[MKS42D_2].htim=&htim1;
 	MKS42DGroup[MKS42D_2].Channel=TIM_CHANNEL_3;
 	MKS42DGroup[MKS42D_2].io=RMIOGroup+RMIO_5;
+	MKS42DGroup[MKS42D_2].Steps=0;
 	
 	MKS42DGroup[MKS42D_3].htim=&htim1;
 	MKS42DGroup[MKS42D_3].Channel=TIM_CHANNEL_4;
 	MKS42DGroup[MKS42D_3].io=RMIOGroup+RMIO_7;
-	
-	
+	MKS42DGroup[MKS42D_3].Steps=0;
 	
 }
 
@@ -61,24 +66,29 @@ void MKS42D_AddTask(uint8_t mks_num,float rotatespeed,float rotaten){//转速，
 	MKS42D *tempmks = MKS42DGroup+mks_num;
 
 	if(tempschedule[MKS42D_Index[mks_num]].state==EMPTY_){
-		uint8_t tempdir=1;
+		uint8_t tempdir=0;
 		float tempspeed=rotatespeed;
-		if(rotatespeed<0){//如果是反转记录为0，速度回为正数
-			tempdir=0;
+		if(rotatespeed<0){//如果是反转记录为1
+			tempdir=1;
 			tempspeed*=-1;
 		}
-		uint32_t need_time_ms = rotaten/tempspeed*1000;//单位ms
+		else{
+			tempdir=0;
+			tempspeed*=1;
+		}
+		uint32_t total_steps_needed = (uint32_t)(rotaten * STEPS_PER_REVOLUTION);
+		uint32_t need_time_ms = (total_steps_needed * 1000) / ( (uint32_t)(tempspeed * STEPS_PER_REVOLUTION) );
 
 		tempschedule[MKS42D_Index[mks_num]].Dir=tempdir;
 		tempschedule[MKS42D_Index[mks_num]].speed=tempspeed;
 		tempschedule[MKS42D_Index[mks_num]].Needtime=need_time_ms;
 		tempschedule[MKS42D_Index[mks_num]].state=WAITING_;
 	}
-	MKS42D_Index[mks_num]= (MKS42D_Index[mks_num]+1)%128;
+	MKS42D_Index[mks_num]= (MKS42D_Index[mks_num]+1)%MAX_SCHEDULE;
 }
 
 
-void RunMKS42D(){//放在定时器中断中执行
+void RunMKS42D(){//放在定时器中断中执行 //1ms一次
 	for(int i=0;i<MKS42D_NUM;i++){
 
 		MKS42D *tempmks = MKS42DGroup+i;
@@ -109,6 +119,28 @@ void RunMKS42D(){//放在定时器中断中执行
 		}
 		else if(tempschedule->state==RUNNING_){
 			if(tempschedule->Endtime > uwTick){
+				if(i==MKS42D_0){
+					if(tempschedule->Dir==0){
+						if(tempmks->Steps + 0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION > 7.62* STEPS_PER_REVOLUTION){//最大转动到7.62圈 再多机构会干涉
+							setPWM(tempmks->htim,tempmks->Channel,2000,0);//急停
+							Schedule_Reset(MKS42D_Schedule[i]);
+							MKS42D_Taskx[i] = 0;
+							MKS42D_Index[i] = 0;
+							continue;
+						}
+						tempmks->Steps+=0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION;
+					}
+					else if(tempschedule->Dir==1){
+						if(tempmks->Steps + 1000< 0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION){
+							setPWM(tempmks->htim,tempmks->Channel,2000,0);//急停
+							Schedule_Reset(MKS42D_Schedule[i]);
+							MKS42D_Taskx[i] = 0;
+							MKS42D_Index[i] = 0;
+							continue;
+						}
+						tempmks->Steps-=0.001*(tempschedule->speed)*STEPS_PER_REVOLUTION;
+					}
+				}
 				tempschedule->state=RUNNING_;
 			}
 			else if(tempschedule->Endtime <= uwTick){
@@ -121,5 +153,15 @@ void RunMKS42D(){//放在定时器中断中执行
 				MKS42D_Taskx[i]=(MKS42D_Taskx[i]+1)%MAX_SCHEDULE;//拨到下一个任务
 			}
 		}
+	}
+}
+
+void Schedule_Reset(MKS42DSchedule * schedule){
+	for(int i=0;i<MAX_SCHEDULE;i++){
+		schedule->state=EMPTY_;
+		schedule->Endtime=0;
+		schedule->Needtime=0;
+		schedule->Dir=0;
+		schedule->speed=0.0;
 	}
 }

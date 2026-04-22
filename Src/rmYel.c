@@ -6,7 +6,10 @@ uint8_t ucEnd[1]={0xff};
 __IO uint32_t rmYel_uwTick=0;
 rmyel_target target;
 CutTime cuttime;
+Platform platform;
 float knife_xerror=0.0f;
+double r_per_mm;
+
 
 void rmYel_Init(){
 	target.x=0;
@@ -14,6 +17,12 @@ void rmYel_Init(){
 	cuttime.uwTick_Fir=0;
 	cuttime.uwTick_Sec=0;
 	cuttime.State=IDLE;
+	
+	platform.bias_y=100.0f;
+	platform.stroke=269.0f;
+	platform.position=0.0f;
+	
+	r_per_mm=7.62f/269.00f;////fe*0.03=7.62r->269mm
 }
 
 void Target_Update(){
@@ -25,7 +34,6 @@ void Target_Update(){
 	target.y=Point_Received[1];
 	target.r_x=target.x/CAM_WIDTH * REAL_WIDTH;
 	target.r_y=target.y/CAM_HEIGHT * REAL_HEIGHT;
-	
 }
 
 

@@ -15,7 +15,6 @@ int main(void)
 {
 	InitAll();
 	HAL_Delay(1);
-	
   while (1)
   {
 		Key_Proc();

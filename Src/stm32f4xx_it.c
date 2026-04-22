@@ -248,6 +248,7 @@ void TIM1_TRG_COM_TIM11_IRQHandler(void)
   /* USER CODE END TIM1_TRG_COM_TIM11_IRQn 1 */
 }
 
+
 /**
   * @brief This function handles USART1 global interrupt.
   */

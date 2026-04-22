@@ -29,11 +29,11 @@ void Serial_proc(){
 		else if(ucBuffer1[1]==MKS42DTASKFLAG){//开始位 0x84 符号位 转速位 圈数位 结束位 5位
 			if(ucBuffer1[2]==0x00){
 				HAL_UART_Transmit(&huart1,(uint8_t *)"0",1,1);
-				MKS42D_AddTask(MKS42D_0,1.0*ucBuffer1[3],ucBuffer1[4]);
+				MKS42D_AddTask(MKS42D_0,1.0*ucBuffer1[3],0.03*ucBuffer1[4]);
 			}
 			else if(ucBuffer1[2]==0x01){
 				HAL_UART_Transmit(&huart1,(uint8_t *)"1",1,1);
-				MKS42D_AddTask(MKS42D_0,-1.0*ucBuffer1[3],ucBuffer1[4]);
+				MKS42D_AddTask(MKS42D_0,-1.0*ucBuffer1[3],0.03*ucBuffer1[4]);//7.71
 			}
 
 		}

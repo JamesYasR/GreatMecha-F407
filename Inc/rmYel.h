@@ -26,7 +26,7 @@
 #define KNIFE_X REAL_WIDTH/2+294.55f //mm
 
 extern __IO uint32_t rmYel_uwTick;
-
+extern double r_per_mm;
 typedef struct{
 	float x;
 	float y;
@@ -40,10 +40,17 @@ typedef struct{
 	uint8_t State;
 }CutTime;
 
+typedef struct{
+	float stroke;
+	float position;
+	float bias_y;
+}Platform;
+
 
 void rmYel_Init();
 extern rmyel_target target;
 extern CutTime cuttime;
+extern Platform platform;
 void Target_Update();
 void rmYel_proc();
 
