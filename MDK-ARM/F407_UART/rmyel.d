@@ -27,4 +27,5 @@ f407_uart/rmyel.o: ..\Src\rmYel.c ..\Inc\rmYel.h ..\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
   ..\Inc\drivers\Servo.h ..\Inc\bsp\tim.h ..\Inc\drivers\Serial.h \
-  ..\Inc\bsp\usart.h ..\Inc\drivers\MKS42D.h ..\Inc\bsp\gpio.h
+  ..\Inc\bsp\usart.h ..\Inc\drivers\MKS42D.h ..\Inc\bsp\gpio.h \
+  ..\Inc\drivers\oled.h

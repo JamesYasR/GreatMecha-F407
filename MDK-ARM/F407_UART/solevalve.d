@@ -1,5 +1,6 @@
-f407_uart/serial.o: ..\Src\drivers\serial.c ..\Inc\drivers\serial.h \
-  ..\Inc\main.h ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
+f407_uart/solevalve.o: ..\Src\drivers\SoleValve.c \
+  ..\Inc\drivers\SoleValve.h ..\Inc\main.h \
+  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal.h \
   ..\Inc\stm32f4xx_hal_conf.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_rcc.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_def.h \
@@ -26,6 +27,4 @@ f407_uart/serial.o: ..\Src\drivers\serial.c ..\Inc\drivers\serial.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
-  ..\Inc\bsp\usart.h ..\Inc\drivers\oled.h ..\Inc\drivers\MKS42D.h \
-  ..\Inc\bsp\gpio.h ..\Inc\drivers\Servo.h ..\Inc\bsp\tim.h \
-  ..\Inc\rmYel.h
+  ..\Inc\drivers\Servo.h ..\Inc\bsp\tim.h ..\Inc\drivers\oled.h

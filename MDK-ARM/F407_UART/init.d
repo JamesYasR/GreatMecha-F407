@@ -29,4 +29,4 @@ f407_uart/init.o: ..\Src\drivers\init.c ..\Inc\drivers\init.h \
   ..\Inc\bsp\usart.h ..\Inc\bsp\gpio.h ..\Inc\bsp\dma.h ..\Inc\bsp\rcc.h \
   ..\Inc\bsp\tim.h ..\Inc\drivers\MKS42D.h ..\Inc\drivers\oled.h \
   ..\Inc\bsp\i2c.h ..\Inc\drivers\Servo.h ..\Inc\rmYel.h \
-  ..\Inc\drivers\Serial.h ..\Inc\bsp\can.h
+  ..\Inc\drivers\Serial.h ..\Inc\bsp\can.h ..\Inc\drivers\SoleValve.h

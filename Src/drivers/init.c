@@ -7,6 +7,7 @@
 #include "Servo.h"
 #include "rmYel.h"
 #include "can.h"
+#include "SoleValve.h"
 
 void InitAll(void){
 	HAL_Init();
@@ -30,7 +31,8 @@ void InitAll(void){
 	HAL_UARTEx_ReceiveToIdle_DMA(&huart6,ucRecei6,ucBuffSize);
   __HAL_DMA_DISABLE_IT(&hdma_usart6_rx,DMA_IT_HT);
 	
-	TIM1_Init();
+	
+	//TIM1_Init();
 	TIM8_Init();
 	TIM6_Init();
 
@@ -40,6 +42,8 @@ void InitAll(void){
 	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
 	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
+	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
+	
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_3);
@@ -57,6 +61,12 @@ void InitAll(void){
 	
 	RMIO_Init();
 	Servo_Init();
-	Set_Servo180Angle(servo180+0,0.00f);
+	Set_Servo180Angle(servo180+0,40);
+	
+	MKS42D_Init();
+	
 	rmYel_Init();
+	solevalve_init();
+	
+	
 }

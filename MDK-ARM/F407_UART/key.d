@@ -25,4 +25,7 @@ f407_uart/key.o: ..\Src\bsp\key.c ..\Inc\bsp\key.h ..\Inc\main.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_pwr_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
-  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h
+  ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
+  ..\Inc\bsp\usart.h ..\Inc\rmYel.h ..\Inc\drivers\Servo.h \
+  ..\Inc\bsp\tim.h ..\Inc\drivers\Serial.h ..\Inc\drivers\MKS42D.h \
+  ..\Inc\bsp\gpio.h ..\Inc\drivers\SoleValve.h ..\Inc\bsp\can.h

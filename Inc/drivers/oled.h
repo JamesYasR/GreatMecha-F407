@@ -67,6 +67,7 @@ extern uint8_t oled_line4[21];
 extern uint8_t oled_line5[21];
 extern uint8_t oled_line6[21];
 extern __IO uint32_t oled_uwTick;
+extern uint8_t temp;
 
 void OLED_proc();
 #endif  /*OLEDG_H*/

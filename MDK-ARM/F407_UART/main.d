@@ -30,4 +30,4 @@ f407_uart/main.o: ..\Src\main.c ..\Inc\main.h \
   ..\Inc\bsp\dma.h ..\Inc\bsp\rcc.h ..\Inc\bsp\tim.h ..\Inc\drivers\it.h \
   ..\Inc\bsp\key.h ..\Inc\drivers\MKS42D.h ..\Inc\drivers\serial.h \
   ..\Inc\drivers\oled.h ..\Inc\bsp\i2c.h ..\Inc\drivers\Servo.h \
-  ..\Inc\rmYel.h
+  ..\Inc\rmYel.h ..\Inc\drivers\SoleValve.h ..\Inc\load.h

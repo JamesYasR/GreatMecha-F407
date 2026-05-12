@@ -16,7 +16,6 @@ void Serial_proc();
 uint8_t process_Point(uint8_t *str, uint16_t len);
 extern float Point_Received[2];
 extern uint16_t error_serial[1];
-extern uint8_t TARGETUPDATE_FLAG;
 extern uint8_t temp;
 
 #endif

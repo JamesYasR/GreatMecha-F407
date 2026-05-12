@@ -26,4 +26,5 @@ f407_uart/mks42d.o: ..\Src\drivers\MKS42D.c ..\Inc\drivers\MKS42D.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_tim_ex.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
-  ..\Inc\bsp\gpio.h ..\Inc\bsp\usart.h ..\Inc\bsp\can.h
+  ..\Inc\bsp\gpio.h ..\Inc\bsp\usart.h ..\Inc\bsp\can.h \
+  ..\Inc\drivers\oled.h

@@ -14,14 +14,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){//
 	if(htim->Instance==TIM6){
 		TIM6_Tick++;
 		
-		RunServo();
-		
-		if(KEY_DOWN==1){
-			HAL_UART_Transmit(&huart1,ucTrans1,strlen((char *)ucTrans1),2);
-			
-			MoveMKS42D(MKS42D_1,300,4,7.62*STEPS_PER_REVOLUTION);
-			//Cut_Yel();
-			KEY_DOWN=0;
+		//RunServo();
+		if(TIM6_Tick%100==0){
+			MKS42D_Proc();
 		}
 	}
 }
@@ -92,10 +87,133 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
                 encoder_val |= 0xFFFF000000000000ULL;
             }
             
-            mks42d_encoder[0] = encoder_val;
+            MKS42D1_INFO.axis = encoder_val;
+        }
+    }
+		if(RxHeader.StdId == MKS42D_2 && RxHeader.DLC == 8) {
+        if(rx_data[0] == 0x31) {  // 功能码匹配
+            
+            // 可选：验证CRC校验和
+            uint8_t crc_calc = RxHeader.StdId;
+            for(int i = 0; i < 7; i++) {
+                crc_calc += rx_data[i];
+            }
+            if(crc_calc != rx_data[7]) {
+                // CRC校验失败，丢弃此帧
+                return;
+            }
+            
+            // 组合6字节编码器值 (高位在前)
+            int64_t encoder_val = 0;
+            for(int i = 0; i < 6; i++) {
+                encoder_val = (encoder_val << 8) | rx_data[i+1];
+            }
+            
+            // 处理48位有符号数：如果第47位为1，则为负数
+            if(encoder_val & (1ULL << 47)) {
+                // 符号扩展到64位
+                encoder_val |= 0xFFFF000000000000ULL;
+            }
+            
+            MKS42D2_INFO.axis = encoder_val;
+        }
+    }
+		if(RxHeader.StdId == MKS42D_1 && RxHeader.DLC == 4) {
+        if(rx_data[0] == 0x32) {  // 功能码匹配
+            
+            // 可选：验证CRC校验和
+            uint8_t crc_calc = RxHeader.StdId;
+            for(int i = 0; i < 3; i++) {
+                crc_calc += rx_data[i];
+            }
+            if(crc_calc != rx_data[3]) {
+                // CRC校验失败，丢弃此帧
+                return;
+            }
+            
+            int16_t speed_val = 0;
+						
+						speed_val=(rx_data[1]<<8)+rx_data[2];
+            
+            MKS42D1_INFO.speed = speed_val;
+        }
+    }
+		if(RxHeader.StdId == MKS42D_2 && RxHeader.DLC == 4) {
+        if(rx_data[0] == 0x32) {  // 功能码匹配
+            
+            // 可选：验证CRC校验和
+            uint8_t crc_calc = RxHeader.StdId;
+            for(int i = 0; i < 3; i++) {
+                crc_calc += rx_data[i];
+            }
+            if(crc_calc != rx_data[3]) {
+                // CRC校验失败，丢弃此帧
+                return;
+            }
+            
+            int16_t speed_val = 0;
+						
+						speed_val=(rx_data[1]<<8)+rx_data[2];
+            
+            MKS42D2_INFO.speed = speed_val;
+        }
+    }
+		
+		if(RxHeader.StdId == MKS42D_1 && RxHeader.DLC == 6) {
+        if(rx_data[0] == 0x33) {  // 功能码匹配
+            
+            // 可选：验证CRC校验和
+            uint8_t crc_calc = RxHeader.StdId;
+            for(int i = 0; i < 5; i++) {
+                crc_calc += rx_data[i];
+            }
+            if(crc_calc != rx_data[5]) {
+                // CRC校验失败，丢弃此帧
+                return;
+            }
+            
+            // 组合4字节脉冲数 (高位在前，int32_t类型)
+            int32_t pulse_val = 0;
+            for(int i = 0; i < 4; i++) {
+                pulse_val = (pulse_val << 8) | rx_data[i+1];
+            }
+            
+            // 存储到全局结构体中
+            MKS42D1_INFO.pulse = pulse_val;
+            
+            // 可选：处理脉冲数为负数的情况（int32_t已支持）
+            // 不需要额外处理符号扩展，因为int32_t本身就是有符号的
+        }
+    }
+		if(RxHeader.StdId == MKS42D_2 && RxHeader.DLC == 6) {
+        if(rx_data[0] == 0x33) {  // 功能码匹配
+            
+            // 可选：验证CRC校验和
+            uint8_t crc_calc = RxHeader.StdId;
+            for(int i = 0; i < 5; i++) {
+                crc_calc += rx_data[i];
+            }
+            if(crc_calc != rx_data[5]) {
+                // CRC校验失败，丢弃此帧
+                return;
+            }
+            
+            // 组合4字节脉冲数 (高位在前，int32_t类型)
+            int32_t pulse_val = 0;
+            for(int i = 0; i < 4; i++) {
+                pulse_val = (pulse_val << 8) | rx_data[i+1];
+            }
+            
+            // 存储到全局结构体中
+            MKS42D2_INFO.pulse = pulse_val;
+            
+            // 可选：处理脉冲数为负数的情况（int32_t已支持）
+            // 不需要额外处理符号扩展，因为int32_t本身就是有符号的
         }
     }
 }
+
+
 //++
 
 //错误处理非常重要

@@ -10,17 +10,27 @@
 #include "i2c.h"
 #include "Servo.h"
 #include "rmYel.h"
+#include "SoleValve.h"
+#include "load.h"
+
 
 int main(void)
 {
 	InitAll();
-	HAL_Delay(1);
+	HAL_Delay(1000);
   while (1)
   {
+		//test();
 		Key_Proc();
 		Serial_proc();
 		OLED_proc();
-		MKS42D_Proc();
+		
+		
+		
+		rmYel();
+		
+		load_proc();
+		
   }
 
 }

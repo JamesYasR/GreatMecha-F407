@@ -3,13 +3,14 @@
 #include "oled.h"
 #include "MKS42D.h"
 #include "Servo.h"
-uint8_t TARGETUPDATE_FLAG=0;
+#include "rmYel.h"
+
 __IO uint32_t serial_uwTick=0;
 float Point_Received[2];
 uint16_t error_serial[1]={0};
 
 void Serial_proc(){
-	if(uwTick-serial_uwTick < 10){
+	if(uwTick-serial_uwTick < 100){
 		return;
 	}
 	serial_uwTick=uwTick;
@@ -18,8 +19,7 @@ void Serial_proc(){
 		IS_UART_RECEIVED[0]=UNRECEIVED;
 		if(ucBuffer1[1]==SENDPOINTFLOATFLAG){
 			if(process_Point(ucBuffer1,ucBuffer_len[0])){
-				TARGETUPDATE_FLAG=1;
-				return;
+				Target_Update();
 			}
 			else{
 				error_serial[0]++;
@@ -40,11 +40,11 @@ void Serial_proc(){
 		else if(ucBuffer1[1]==SERVOTASKFLAG){//开始位 0x85 符号位 转速位 时间位 结束位 5位
 			if(ucBuffer1[2]==0x00){
 				HAL_UART_Transmit(&huart1,(uint8_t *)"0",1,1);
-				Set_Servo360Speed(servo360+0,0.1f*ucBuffer1[3],100*ucBuffer1[4]);//正转向上
+				
 			}
 			else if(ucBuffer1[2]==0x01){
 				HAL_UART_Transmit(&huart1,(uint8_t *)"1",1,1);
-				Set_Servo360Speed(servo360+0,-0.1f*ucBuffer1[3],100*ucBuffer1[4]);//反转向下
+				
 			}
 			else if(ucBuffer1[2]==0x02){
 				HAL_UART_Transmit(&huart1,(uint8_t *)"2",1,1);

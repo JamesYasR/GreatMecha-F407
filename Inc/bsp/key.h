@@ -8,7 +8,6 @@ extern "C" {
 #include "main.h"
 extern __IO uint32_t Key_uwTick;
 extern uint8_t ucKey_val,ucKey_down,ucKey_up,ucKey_old;
-extern uint8_t KEY_DOWN,KEY_UP;
 void Key_Proc(void);
 #ifdef __cplusplus
 }

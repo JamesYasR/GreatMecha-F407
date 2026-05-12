@@ -29,4 +29,4 @@ f407_uart/oled.o: ..\Src\drivers\oled.c ..\Inc\drivers\oled.h \
   ..\Inc\drivers\oledfont.h ..\Inc\bsp\i2c.h ..\Inc\drivers\serial.h \
   ..\Inc\bsp\usart.h ..\Inc\drivers\it.h ..\Inc\drivers\Servo.h \
   ..\Inc\bsp\tim.h ..\Inc\rmYel.h ..\Inc\drivers\MKS42D.h \
-  ..\Inc\bsp\gpio.h
+  ..\Inc\bsp\gpio.h ..\Inc\load.h

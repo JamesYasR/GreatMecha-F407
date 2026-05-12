@@ -5,6 +5,8 @@
 #include "it.h"
 #include "Servo.h"
 #include "rmYel.h"
+#include "load.h"
+uint8_t temp;
 unsigned char  ScreenBuffer[SCREEN_PAGE_NUM][SCREEN_COLUMN];//定义屏幕的存储空间
 uint8_t oled_line_[21]="123456789012345678901";
 uint8_t oled_line0[21]="                     ";
@@ -378,13 +380,16 @@ void OLED_proc(){
 	}
 	oled_uwTick=uwTick;
 	
-	sprintf((char *)oled_line0,"Point:%.4f,%.4f ",Point_Received[0],Point_Received[1]);//系统时间 TIM6时间
+	sprintf((char *)oled_line0,"P:%.2f,%.2f",Point_Received[0],Point_Received[1]);//系统时间 TIM6时间
 	
-	sprintf((char *)oled_line1,"n:%.2f        ",(double)mks42d_encoder[0]/16384.0);//系统时间 TIM6时间
-	sprintf((char *)oled_line4,"time:%d %d        ",uwTick/1000,TIM6_Tick/1000);//系统时间 TIM6时间
-  sprintf((char *)oled_line5,"uartr:%d %d         ",uart_recNum[0],uart_recNum[1]);
-	sprintf((char *)oled_line6,"debug:%d %d %d  ",error_recNum[0],error_recNum[1],error_serial[0]);//串口1 串口2 解析
+	sprintf((char *)oled_line1,"N:%.2f ,%.2f,%d ",Knife_Y,(-1.0 *(double)Knife_Dest/16384.0/ALL_STROKE1 * 272.00f - KNIFE_Y_BIAS),cuttime.State);//(-1.0 *(double)MKS42D1_INFO.pulse/STEPS_PER_REVOLUTION/ALL_STROKE * 272.00f - KNIFE_Y_BIAS)
+	sprintf((char *)oled_line2,"M:%d,%d   ",MKS42D1_INFO.pulse,MKS42D2_INFO.pulse);//-4.22
+	sprintf((char *)oled_line3,"T:%.2f %.2f      ",target.r_x,target.r_y);
 	
+	
+  sprintf((char *)oled_line4,"U:%d %d %d %d ",uart_recNum[0],uart_recNum[1],error_recNum[0],error_recNum[1]);
+	sprintf((char *)oled_line5,"db:%d  %d      ",temp ,load_state);
+	sprintf((char *)oled_line6,"time:%d %d        ",uwTick/1000,TIM6_Tick/1000);//系统时间 TIM6时间
 	OLED_ShowStr(0,line0,oled_line0,1);
 	OLED_ShowStr(0,line1,oled_line1,1);
 	OLED_ShowStr(0,line2,oled_line2,1);
