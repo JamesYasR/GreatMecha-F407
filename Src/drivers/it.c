@@ -47,6 +47,8 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 		uart_recNum[1]++;
 		ucBuffer_len[1]=Size;
 		
+		
+		
 		HAL_UARTEx_ReceiveToIdle_DMA(&huart6,ucRecei6,ucBuffSize);
 		__HAL_DMA_DISABLE_IT(&hdma_usart6_rx,DMA_IT_HT);
 	}

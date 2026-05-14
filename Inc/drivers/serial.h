@@ -11,12 +11,17 @@
 #define MKS42DTASKFLAG 0x84
 #define SERVOTASKFLAG 0x85
 
+#define F407CONFIGFLAG 0x03
+
+#define F407CSDFLAG 0x21
+
 extern __IO uint32_t serial_uwTick;
 void Serial_proc();
 uint8_t process_Point(uint8_t *str, uint16_t len);
 extern float Point_Received[2];
 extern uint16_t error_serial[1];
 extern uint8_t temp;
+extern uint8_t OPENFLAG;
 
 #endif
 

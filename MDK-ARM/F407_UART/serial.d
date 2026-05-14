@@ -28,4 +28,4 @@ f407_uart/serial.o: ..\Src\drivers\serial.c ..\Inc\drivers\serial.h \
   ..\Drivers\STM32F4xx_HAL_Driver\Inc\stm32f4xx_hal_uart.h \
   ..\Inc\bsp\usart.h ..\Inc\drivers\oled.h ..\Inc\drivers\MKS42D.h \
   ..\Inc\bsp\gpio.h ..\Inc\drivers\Servo.h ..\Inc\bsp\tim.h \
-  ..\Inc\rmYel.h
+  ..\Inc\rmYel.h ..\Inc\load.h ..\Inc\drivers\SoleValve.h

@@ -6,10 +6,9 @@
 #define STEPS_PER_REVOLUTION 3200
 #define AXIS_PER_REVOLUTION 0x4000
 #define ALL_STROKE1 7.55f
-#define ALL_STROKE2 9.27f
+#define ALL_STROKE2 9.45f
 #define MKS42D_1 0x01
 #define MKS42D_2 0x02
-
 
 extern uint8_t ucCANTrans[20];
 extern __IO uint32_t mks42d_uwTick;

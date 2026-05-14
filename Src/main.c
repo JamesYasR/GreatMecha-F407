@@ -14,22 +14,27 @@
 #include "load.h"
 
 
+
+
 int main(void)
 {
 	InitAll();
 	HAL_Delay(1000);
+	
+
   while (1)
   {
-		//test();
+	
+		
 		Key_Proc();
 		Serial_proc();
 		OLED_proc();
 		
-		
-		
-		rmYel();
-		
-		load_proc();
+		if(OPENFLAG){
+			rmYel();
+			load_proc();
+			Tray_Move();
+		}
 		
   }
 

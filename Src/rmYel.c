@@ -5,29 +5,37 @@
 
 #define STEP0_CY 0
 #define STEP1_CY 1
+#define STEP1_1CY 7
 #define STEP2_CY 2
 #define STEP3_CY 3
 #define STEP4_CY 4
 #define STEP5_CY 5
 #define STEP6_CY 6
 
+#define THRES 1100
 
-
+#define DELAY 50
 uint8_t ucEnd[1]={0xff};
 uint8_t tempflag=0;
 __IO uint32_t rmYel_uwTick=0;
+__IO uint32_t last_rmYel_uwTick=0;
+
 rmyel_target target;
-CutTime cuttime;
 int32_t Knife_Dest=0;
 float Knife_Stroke=272.00;//mm
 float Threshold_X=15.0f;
 float Threshold_Y=40.0f;
 float Knife_Y=0;
+float last_x=1220.0f;
 
 //347mm 75mm ->stroke 272mm 510mm 7.10r
 //23.35mm
 //相机中心位置
 //现在以相机坐标为坐标
+
+uint8_t rmYel_state=STEP0_CY;
+
+
 void rmYel_Init(){
 	target.x=0;
 	target.y=0;
@@ -35,15 +43,11 @@ void rmYel_Init(){
 	target.r_y=0;
 	Knife_Y = -1.0*KNIFE_Y_BIAS;
 	
-	cuttime.uwTick_Fir=0;
-	cuttime.uwTick_Sec=0;
-	cuttime.State=STEP0_CY;
-	
 	
 	Knife_Dest=-1.00*(0.0+KNIFE_Y_BIAS)/272.00 *ALL_STROKE1 * 0x4000;
 	MoveMKS42D_absAxis(MKS42D_1,300,10,Knife_Dest);
 	
-	MKS42d2_Dest=-1.00 * 0x4000;
+	MKS42d2_Dest=-0.5 * 0x4000;
 	MoveMKS42D_absAxis(MKS42D_2,600,10,MKS42d2_Dest);
 }
 
@@ -57,12 +61,14 @@ void Target_Update(){
 }
 
 void Lock_Update(){
-	if(cuttime.State==STEP0_CY){
-		
+	if(rmYel_state==STEP0_CY){
 		if(Knife_Y-target.r_y<=Threshold_Y && Knife_Y-target.r_y>=-1.0 *Threshold_Y){
-			if(target.x>=1150 && target.x<=1175){
+			if(target.x>=THRES && target.x<=THRES+15){
+				//if(target.x>last_x+5){
+					//return;
+				//}
 				Cut_Yel();
-				temp++;
+				last_x = target.x;
 			}
 		}
 	}
@@ -70,50 +76,66 @@ void Lock_Update(){
 
 
 void rmYel(){
-	if(uwTick-rmYel_uwTick < 77){
+	if(uwTick-rmYel_uwTick < 20){
 		return;
 	}
 	rmYel_uwTick=uwTick;
 	
 	
-	if(cuttime.State == STEP0_CY){
+	if(rmYel_state == STEP0_CY){
 			Target_Update();
       Lock_Update(); 
-      if(cuttime.State == STEP0_CY){
+      if(rmYel_state == STEP0_CY){
         Chasing_Yel();
       }
    }
 	
-  if(cuttime.State==STEP1_CY){
-       cuttime.uwTick_Fir=uwTick;
-       cuttime.uwTick_Sec=uwTick+CUTTIME_DOWN+CUT_WAITTIME;
-       Set_Servo180Angle(servo180+0,115);
-			 cuttime.State=STEP2_CY;
+  else if(rmYel_state ==STEP1_CY){
+       last_rmYel_uwTick =uwTick;
+			 rmYel_state =STEP1_1CY;
    }
-   if(cuttime.State==STEP2_CY){
-			if(uwTick<cuttime.uwTick_Sec){
+	 else if(rmYel_state ==STEP1_1CY){
+			if(uwTick-last_rmYel_uwTick < DELAY){
 				return;
 			}
-				 target.x = 0;
-				 target.y = 0;
-				 target.r_x = 0;
-				 target.r_y = 0;
-				 Point_Received[0] = 0;
-				 Point_Received[1] = 0;
-				 Set_Servo180Angle(servo180+0,40);
-				 cuttime.State=STEP3_CY;
+			 setPWM(&htim8,TIM_CHANNEL_1,50,100.0f/180.0f *0.1 +0.025);
+       last_rmYel_uwTick =uwTick;
+			 rmYel_state =STEP2_CY;
+   }
+
+   else if(rmYel_state ==STEP2_CY){
+			if(uwTick>=last_rmYel_uwTick+CUTTIME_DOWN+CUT_WAITTIME){
+				 //setPWM(&htim8,TIM_CHANNEL_1,50,40.0f/180.0f *0.1 +0.025);
+				 rmYel_state =STEP3_CY;
+				 last_rmYel_uwTick = uwTick;
+			}
     }
-		if(cuttime.State==STEP3_CY){
+		else if(rmYel_state ==STEP3_CY){
 			   HAL_UART_Transmit(&huart1,ucEnd,1,1);
-         cuttime.State=STEP0_CY;
+				 rmYel_state =STEP4_CY;
+         last_rmYel_uwTick = uwTick;
+				 
+		}
+		else if(rmYel_state ==STEP4_CY){
+			  if(uwTick>=last_rmYel_uwTick+40){//让上位机有充足时间切换目标
+					 //状态解锁将会触发Lock_Update，所以提前清空缓存，防止一个目标连续被执行
+					 target.x = 0;
+					 target.y = 0;
+					 target.r_x = 0;
+					 target.r_y = 0;
+					 Point_Received[0] = 0;
+					 Point_Received[1] = 0;
+					 rmYel_state =STEP0_CY;
+					 last_rmYel_uwTick = 0;
+				}
 		}
 }
 
 void Cut_Yel(){
-	if(cuttime.State!=STEP0_CY){
+	if(rmYel_state !=STEP0_CY){
 		return;
 	}
-	cuttime.State=STEP1_CY;
+	rmYel_state =STEP1_CY;
 }
 
 void Chasing_Yel(){

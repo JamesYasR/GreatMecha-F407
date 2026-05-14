@@ -1,6 +1,9 @@
 #include "load.h"
 #include "MKS42D.h"
 #include "SoleValve.h"
+#include "tim.h"
+#include "gpio.h"
+
 #define STEP0 0
 #define STEP1 1
 #define STEP2 2
@@ -9,23 +12,42 @@
 #define STEP5 5
 #define STEP6 6
 
+#define STEPS 12800
+#define TIMES 1088
 __IO uint32_t load_uwTick=0;
+__IO uint32_t tray_uwTick=0;
 __IO uint32_t lastload_uwTick=0;
+__IO uint32_t lasttray_uwTick=0;
+//0->17 怎么触发？ signal置1的时候
+//然后根据0->17的状态 //0-> 9 九步前进 9->17->0 回到0状态
 
 uint8_t load_state=STEP0;
+uint8_t tray_state=0;
+uint8_t tray_signal=0;
+uint8_t tray_moving=0;
+
+uint8_t CSD_FLAG=0;
+
 
 void test(){
+	setPWM(&htim1,TIM_CHANNEL_4,12800,0.2);
+	HAL_Delay(1000);
+	
 	HAL_Delay(5000);
-	MoveMKS42D_absAxis(MKS42D_2,600,10,-2.0 * AXIS_PER_REVOLUTION);
-	HAL_Delay(5000);
-	MoveMKS42D_absAxis(MKS42D_2,600,10,0.0 * AXIS_PER_REVOLUTION);
 }
 
 void load_proc(){
-	if(uwTick-load_uwTick < 99){
+	if(uwTick-load_uwTick < 100){
 		return;
 	}
 	load_uwTick=uwTick;
+	
+	if(tray_state==10){
+		if(MKS42D2_INFO.pulse <= -1.6 *STEPS_PER_REVOLUTION){
+			MoveMKS42D_absAxis(MKS42D_2,600,10,-1.5 * AXIS_PER_REVOLUTION);
+		}
+		return;
+	}
 	
 	if(load_state==STEP0){
 		valve_open(sv+0);
@@ -41,6 +63,7 @@ void load_proc(){
 	}
 	if(load_state==STEP2){
 		if(uwTick - lastload_uwTick > 100){
+			//tray_signal=1;
 			valve_close(sv+0);
 			lastload_uwTick=uwTick;
 			load_state=STEP3;
@@ -48,13 +71,13 @@ void load_proc(){
 	}
 
 	if(load_state==STEP3){
-		MoveMKS42D_absAxis(MKS42D_2,600,10,-1.0 * AXIS_PER_REVOLUTION);
+		MoveMKS42D_absAxis(MKS42D_2,600,10,-1.5 * AXIS_PER_REVOLUTION);
 		lastload_uwTick=uwTick;
 		load_state=STEP4;
 	}
 	
 	if(load_state==STEP4){
-		if(MKS42D2_INFO.pulse >= -1.2 *STEPS_PER_REVOLUTION){
+		if(MKS42D2_INFO.pulse >= -1.6 *STEPS_PER_REVOLUTION){
 			lastload_uwTick=uwTick;
 			load_state=STEP5;
 		}
@@ -62,6 +85,7 @@ void load_proc(){
 	
 	if(load_state==STEP5){
 		if(uwTick - lastload_uwTick > 100){
+			tray_signal=1;
 			valve_open(sv+0);
 			lastload_uwTick=uwTick;
 			load_state=STEP6;
@@ -73,5 +97,67 @@ void load_proc(){
 			load_state=STEP0;
 		}
 	}
+	
+}
+	
+void Tray_Move(){
+	if(uwTick-tray_uwTick < 10){
+		return;
+	}
+	tray_uwTick=uwTick;
+	
+	
+	if(tray_state==10){
+			RMIO_WritePin(RMIOGroup+RMIO_1,GPIO_PIN_RESET);
+			if(tray_moving==0){
+				lasttray_uwTick=uwTick;
+				tray_moving=1;
+				setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
+			}
+			else if(tray_moving==1){
+				if(uwTick - lasttray_uwTick >=10000){
+					tray_moving=0;
+					//tray_state=(tray_state+1)%11;
+				}
+			}
+			return;
+	}
+	
+	if(tray_signal==1 || tray_moving==1){
+		tray_signal=0;
+		if(tray_state>=0 && tray_state<=8){
+			RMIO_WritePin(RMIOGroup+RMIO_1,GPIO_PIN_RESET);
+			if(tray_moving==0){
+				lasttray_uwTick=uwTick;
+				tray_moving=1;
+				setPWM(&htim1,TIM_CHANNEL_4,STEPS,0.2);
+			}
+			else if(tray_moving==1){
+				if(uwTick - lasttray_uwTick >=TIMES){
+					setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
+					tray_moving=0;
+					tray_state=(tray_state+1)%11;
+				}
+			
+			}
+		}
+		else if(tray_state>=9 && tray_state<10){
+			RMIO_WritePin(RMIOGroup+RMIO_1,GPIO_PIN_SET);
+			if(tray_moving==0){
+				lasttray_uwTick=uwTick;
+				tray_moving=1;
+				setPWM(&htim1,TIM_CHANNEL_4,STEPS,0.2);
+			}
+			else if(tray_moving==1){
+				if(uwTick - lasttray_uwTick >= 9200){
+					setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
+					tray_moving=0;
+					tray_state=(tray_state+1)%11;
+				}
+			
+			}
+		}
+	}
+	
 	
 }

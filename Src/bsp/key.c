@@ -34,17 +34,8 @@ void Key_Proc(void){
 	if(ucKey_down==2){
 			//HAL_UART_Transmit(&huart1,ucTrans1,strlen((char *)ucTrans1),2);
 			temp++;
-			//Cut_Yel();
+			Cut_Yel();
 			//setPWM(&htim1,TIM_CHANNEL_4,2000,20);
-//		 if(temp%2==0){
-//			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_RESET);
-//		 }
-//		 else{
-//			HAL_GPIO_WritePin(GPIOB,GPIO_PIN_12,GPIO_PIN_SET);
-//		 }
-		 
-//			RMIO_WritePin(RMIO_1,GPIO_PIN_SET);
-//			RMIO_Update();
 	}
 	if(ucKey_up==4){
 		//if(sv[0].State==IDLE){

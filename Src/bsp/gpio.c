@@ -1,5 +1,5 @@
 #include "gpio.h"
-
+#include "oled.h"
 GPIO_RMIO RMIOGroup[4];
 void RMIO_Init(){
 	RMIOGroup[RMIO_1].GPIOGroup=GPIOB;
@@ -68,4 +68,10 @@ void GPIO_Init(void){
 
 void RMIO_WritePin(GPIO_RMIO * RMPIN,GPIO_PinState state){
 	HAL_GPIO_WritePin(RMPIN->GPIOGroup,RMPIN->GPIOPin,state);
+	if(state==GPIO_PIN_RESET){
+		//temp++;
+	}
+	else if(state==GPIO_PIN_SET){
+		//temp--;
+	}
 }

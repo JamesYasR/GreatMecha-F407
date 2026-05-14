@@ -4,10 +4,14 @@
 #include "MKS42D.h"
 #include "Servo.h"
 #include "rmYel.h"
+#include "load.h"
+#include "SoleValve.h"
 
 __IO uint32_t serial_uwTick=0;
 float Point_Received[2];
 uint16_t error_serial[1]={0};
+
+uint8_t OPENFLAG=0;
 
 void Serial_proc(){
 	if(uwTick-serial_uwTick < 100){
@@ -53,6 +57,34 @@ void Serial_proc(){
 
 		}
 
+	}
+	if(IS_UART_RECEIVED[1]==RECEIVED){
+		IS_UART_RECEIVED[1]=UNRECEIVED;
+		if(ucBuffer_len[1]==5){
+			if(ucBuffer6[0]==STARTFLAG && ucBuffer6[4]==ENDFLAG){
+				if(ucBuffer6[1]==F407CONFIGFLAG){
+					if(ucBuffer6[2]==F407CSDFLAG){
+						CSD_FLAG=ucBuffer6[3];
+						if(CSD_FLAG){
+							  OPENFLAG=1;
+								valve_open(sv+1);
+								valve_open(sv+2);
+							  Cut_Yel();
+						}
+						else{
+								OPENFLAG=0;
+								valve_close(sv+1);
+								valve_close(sv+2);
+								MoveMKS42D_absAxis(MKS42D_2,0,0,-1.0 * AXIS_PER_REVOLUTION);
+								MoveMKS42D_absAxis(MKS42D_1,0,0,-1.00*(0.0+KNIFE_Y_BIAS)/272.00 *ALL_STROKE1 * 0x4000);
+								setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
+						}
+					}
+					
+				}
+			
+			}
+		}
 	}
 	
 }

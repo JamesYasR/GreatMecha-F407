@@ -2,7 +2,7 @@
 #define __TIM_H__
 #include "main.h"
 
-
+extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim8;
 extern TIM_HandleTypeDef htim6;
 
