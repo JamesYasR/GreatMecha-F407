@@ -388,7 +388,7 @@ void OLED_proc(){
 	
 	
   sprintf((char *)oled_line4,"U:%d %d %d %d ",uart_recNum[0],uart_recNum[1],error_recNum[0],error_recNum[1]);
-	sprintf((char *)oled_line5,"db:%d  %d  %d  %d  ",rmYel_state,temp,load_state,tray_state);
+	sprintf((char *)oled_line5,"db: %d  %d  %d  ",temp,load_state,tray_state);
 	sprintf((char *)oled_line6,"time:%d %d        ",uwTick/1000,TIM6_Tick/1000);//系统时间 TIM6时间
 	OLED_ShowStr(0,line0,oled_line0,1);
 	OLED_ShowStr(0,line1,oled_line1,1);

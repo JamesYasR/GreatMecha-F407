@@ -69,7 +69,6 @@ void Serial_proc(){
 							  OPENFLAG=1;
 								valve_open(sv+1);
 								valve_open(sv+2);
-							  Cut_Yel();
 						}
 						else{
 								OPENFLAG=0;
@@ -77,7 +76,7 @@ void Serial_proc(){
 								valve_close(sv+2);
 								MoveMKS42D_absAxis(MKS42D_2,0,0,-1.0 * AXIS_PER_REVOLUTION);
 								MoveMKS42D_absAxis(MKS42D_1,0,0,-1.00*(0.0+KNIFE_Y_BIAS)/272.00 *ALL_STROKE1 * 0x4000);
-								setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
+								//setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
 						}
 					}
 					

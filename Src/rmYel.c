@@ -12,9 +12,9 @@
 #define STEP5_CY 5
 #define STEP6_CY 6
 
-#define THRES 1100
+#define THRES 1140
 
-#define DELAY 50
+#define DELAY 20
 uint8_t ucEnd[1]={0xff};
 uint8_t tempflag=0;
 __IO uint32_t rmYel_uwTick=0;
@@ -47,7 +47,7 @@ void rmYel_Init(){
 	Knife_Dest=-1.00*(0.0+KNIFE_Y_BIAS)/272.00 *ALL_STROKE1 * 0x4000;
 	MoveMKS42D_absAxis(MKS42D_1,300,10,Knife_Dest);
 	
-	MKS42d2_Dest=-0.5 * 0x4000;
+	MKS42d2_Dest=-1.5 * 0x4000;
 	MoveMKS42D_absAxis(MKS42D_2,600,10,MKS42d2_Dest);
 }
 
@@ -76,7 +76,7 @@ void Lock_Update(){
 
 
 void rmYel(){
-	if(uwTick-rmYel_uwTick < 20){
+	if(uwTick-rmYel_uwTick < 50){
 		return;
 	}
 	rmYel_uwTick=uwTick;
@@ -94,18 +94,19 @@ void rmYel(){
        last_rmYel_uwTick =uwTick;
 			 rmYel_state =STEP1_1CY;
    }
+
 	 else if(rmYel_state ==STEP1_1CY){
 			if(uwTick-last_rmYel_uwTick < DELAY){
 				return;
 			}
-			 setPWM(&htim8,TIM_CHANNEL_1,50,100.0f/180.0f *0.1 +0.025);
+			 Set_Servo180Angle(servo180+0,133);
        last_rmYel_uwTick =uwTick;
 			 rmYel_state =STEP2_CY;
    }
 
    else if(rmYel_state ==STEP2_CY){
 			if(uwTick>=last_rmYel_uwTick+CUTTIME_DOWN+CUT_WAITTIME){
-				 //setPWM(&htim8,TIM_CHANNEL_1,50,40.0f/180.0f *0.1 +0.025);
+				 Set_Servo180Angle(servo180+0,40);
 				 rmYel_state =STEP3_CY;
 				 last_rmYel_uwTick = uwTick;
 			}

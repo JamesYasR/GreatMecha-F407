@@ -41,9 +41,10 @@ void InitAll(void){
 	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_1);
 	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_2);
 	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_3);
-	//HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
 	HAL_TIM_PWM_Start(&htim1,TIM_CHANNEL_4);
 	setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
+
+	
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_2);
 	HAL_TIM_PWM_Start(&htim8,TIM_CHANNEL_3);
@@ -61,12 +62,11 @@ void InitAll(void){
 	
 	RMIO_Init();
 	Servo_Init();
-	Set_Servo180Angle(servo180+0,40);
 	
 	MKS42D_Init();
 	
 	rmYel_Init();
 	solevalve_init();
 	
-	
+	Set_Servo180Angle(servo180+0,40);
 }

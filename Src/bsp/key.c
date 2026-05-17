@@ -35,7 +35,6 @@ void Key_Proc(void){
 			//HAL_UART_Transmit(&huart1,ucTrans1,strlen((char *)ucTrans1),2);
 			temp++;
 			Cut_Yel();
-			//setPWM(&htim1,TIM_CHANNEL_4,2000,20);
 	}
 	if(ucKey_up==4){
 		//if(sv[0].State==IDLE){

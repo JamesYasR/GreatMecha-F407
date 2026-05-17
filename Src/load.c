@@ -12,8 +12,12 @@
 #define STEP5 5
 #define STEP6 6
 
-#define STEPS 12800
-#define TIMES 1088
+#define STEPS 10500
+#define TIMES 1000
+
+#define POS1 -1.5f
+#define POS2 -1.4f
+
 __IO uint32_t load_uwTick=0;
 __IO uint32_t tray_uwTick=0;
 __IO uint32_t lastload_uwTick=0;
@@ -29,21 +33,14 @@ uint8_t tray_moving=0;
 uint8_t CSD_FLAG=0;
 
 
-void test(){
-	setPWM(&htim1,TIM_CHANNEL_4,12800,0.2);
-	HAL_Delay(1000);
-	
-	HAL_Delay(5000);
-}
-
 void load_proc(){
 	if(uwTick-load_uwTick < 100){
 		return;
 	}
 	load_uwTick=uwTick;
 	
-	if(tray_state==10){
-		if(MKS42D2_INFO.pulse <= -1.6 *STEPS_PER_REVOLUTION){
+	if(tray_state==6){
+		if(MKS42D2_INFO.pulse <= POS2 *STEPS_PER_REVOLUTION){
 			MoveMKS42D_absAxis(MKS42D_2,600,10,-1.5 * AXIS_PER_REVOLUTION);
 		}
 		return;
@@ -55,13 +52,13 @@ void load_proc(){
 		lastload_uwTick=uwTick;
 		load_state=STEP1;
 	}
-	if(load_state==STEP1){
+	else if(load_state==STEP1){
 		if(MKS42D2_INFO.pulse <= -0.98 *ALL_STROKE2 *STEPS_PER_REVOLUTION){
 			lastload_uwTick=uwTick;
 			load_state=STEP2;
 		}
 	}
-	if(load_state==STEP2){
+	else if(load_state==STEP2){
 		if(uwTick - lastload_uwTick > 100){
 			//tray_signal=1;
 			valve_close(sv+0);
@@ -70,20 +67,20 @@ void load_proc(){
 		}
 	}
 
-	if(load_state==STEP3){
+	else if(load_state==STEP3){
 		MoveMKS42D_absAxis(MKS42D_2,600,10,-1.5 * AXIS_PER_REVOLUTION);
 		lastload_uwTick=uwTick;
 		load_state=STEP4;
 	}
 	
-	if(load_state==STEP4){
+	else if(load_state==STEP4){
 		if(MKS42D2_INFO.pulse >= -1.6 *STEPS_PER_REVOLUTION){
 			lastload_uwTick=uwTick;
 			load_state=STEP5;
 		}
 	}
 	
-	if(load_state==STEP5){
+	else if(load_state==STEP5){
 		if(uwTick - lastload_uwTick > 100){
 			tray_signal=1;
 			valve_open(sv+0);
@@ -91,7 +88,7 @@ void load_proc(){
 			load_state=STEP6;
 		}
 	}
-	if(load_state==STEP6){
+	else if(load_state==STEP6){
 		if(uwTick - lastload_uwTick > 100){
 			lastload_uwTick=uwTick;
 			load_state=STEP0;
@@ -107,7 +104,7 @@ void Tray_Move(){
 	tray_uwTick=uwTick;
 	
 	
-	if(tray_state==10){
+	if(tray_state==6){
 			RMIO_WritePin(RMIOGroup+RMIO_1,GPIO_PIN_RESET);
 			if(tray_moving==0){
 				lasttray_uwTick=uwTick;
@@ -125,7 +122,7 @@ void Tray_Move(){
 	
 	if(tray_signal==1 || tray_moving==1){
 		tray_signal=0;
-		if(tray_state>=0 && tray_state<=8){
+		if(tray_state>=0 && tray_state<=4){
 			RMIO_WritePin(RMIOGroup+RMIO_1,GPIO_PIN_RESET);
 			if(tray_moving==0){
 				lasttray_uwTick=uwTick;
@@ -136,12 +133,12 @@ void Tray_Move(){
 				if(uwTick - lasttray_uwTick >=TIMES){
 					setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
 					tray_moving=0;
-					tray_state=(tray_state+1)%11;
+					tray_state=(tray_state+1)%7;
 				}
 			
 			}
 		}
-		else if(tray_state>=9 && tray_state<10){
+		else if(tray_state>=5 && tray_state<6){
 			RMIO_WritePin(RMIOGroup+RMIO_1,GPIO_PIN_SET);
 			if(tray_moving==0){
 				lasttray_uwTick=uwTick;
@@ -149,10 +146,10 @@ void Tray_Move(){
 				setPWM(&htim1,TIM_CHANNEL_4,STEPS,0.2);
 			}
 			else if(tray_moving==1){
-				if(uwTick - lasttray_uwTick >= 9200){
+				if(uwTick - lasttray_uwTick >= 3000){
 					setPWM(&htim1,TIM_CHANNEL_4,200,0.0);
 					tray_moving=0;
-					tray_state=(tray_state+1)%11;
+					tray_state=(tray_state+1)%7;
 				}
 			
 			}

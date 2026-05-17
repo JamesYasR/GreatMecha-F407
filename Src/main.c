@@ -9,6 +9,7 @@
 #include "oled.h"
 #include "i2c.h"
 #include "Servo.h"
+
 #include "rmYel.h"
 #include "SoleValve.h"
 #include "load.h"
@@ -24,8 +25,6 @@ int main(void)
 
   while (1)
   {
-	
-		
 		Key_Proc();
 		Serial_proc();
 		OLED_proc();
@@ -36,6 +35,5 @@ int main(void)
 			Tray_Move();
 		}
 		
-  }
-
+	}
 }
